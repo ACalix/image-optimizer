@@ -8,6 +8,7 @@ function formatPath(imgPath, imgFileType) {
     png: '**/*.png',
     jpg: '**/*.jpg'
   };
+  let imgDir, fileType;
 
   try {
   	imgPath = path.normalize(imgPath);
@@ -26,7 +27,6 @@ function formatPath(imgPath, imgFileType) {
   	}
     return { imgDir, fileType }
   } catch(e) {
-    console.log(e);
   	console.log('Invalid PATH');
   	process.exit();
   }

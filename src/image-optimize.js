@@ -13,7 +13,6 @@ program
   .option('-m, --multicore', 'Allow optimizers to run in parallel', '')
   .arguments('<IMGTYPE> <PATH>')
   .action((IMGTYPE, PATH) => {
-    console.log(PATH);
     const result = formatPath(PATH, IMGTYPE);
     imgDir = result.imgDir;
     fileType = result.fileType;
