@@ -33,7 +33,12 @@ if (program.verbose && program.multicore) {
 const batch = (program.multicore) ? require('./multicore') : require('./optimize').optimizeBatch;
 
 getSizeInfo(imgDir + fileType, (err, result) => {
-  if (err) { throw err }
+  if (err) {
+    throw err;
+  } else if (result.files.length === 0) {
+    console.log(`No ${imgType} found`);
+    process.exit();
+  }
   const originalSize = Math.round((result.size) / 1024);
 
   if (program.verbose) {
