@@ -1,10 +1,10 @@
-const fsExtra = require('fs-extra');
-const { getSizeInfo, formatPath, makeTmpDirectory } = require('./utils');
-const confirm = require('confirm-simple');
+import fsExtra from 'fs-extra';
+import confirm from 'confirm-simple';
+import program from 'commander';
+import { getSizeInfo, formatPath, makeTmpDirectory } from './utils';
 
 let imgType;
-let fileType, imgDir, tmpDir = './tmp/';
-const program = require('commander');
+let fileType, imgDir, tmpDir;
 program
   .version('1.0.0')
   .usage('[options] <IMGTYPE> <PATH>')
@@ -20,6 +20,11 @@ program
   })
   .parse(process.argv);
 
+if (program.verbose && program.multicore) {
+  program.verbose = false;
+  console.warn('Verbose flag is not supported for multicore option');
+}
+
 const batch = (program.multicore) ? require('./multicore') : require('./optimize').optimizeBatch;
 
 getSizeInfo(imgDir + fileType, (err, result) => {
@@ -30,9 +35,9 @@ getSizeInfo(imgDir + fileType, (err, result) => {
     logStart(result.files, originalSize);
   }
 
-	makeTmpDirectory(result.files);
+  tmpDir = makeTmpDirectory(result.files);
 
-  batch(result.files, imgType).then(files => {
+  batch(result.files, imgType, tmpDir).then((files) => {
     if (program.audit) {
       removeTmpDir();
       printFiles(files, program.audit);
@@ -85,8 +90,8 @@ function replaceSrcFiles() {
   });
 }
 
-function removeTmpDir(){
-  fsExtra.remove(tmpDir, function(err) {
+function removeTmpDir() {
+  fsExtra.remove(tmpDir, (err) => {
     if (err) {
       console.log('error cleaning tmp files');
     }
@@ -95,9 +100,9 @@ function removeTmpDir(){
 }
 
 function printFiles(files, threshold) {
-  for (let i = 0, j = files.length; i < j; i ++) {
+  for (let i = 0, j = files.length; i < j; i += 1) {
     if (files[i].changePercent >= threshold) {
-      process.stdout.write(files[i].src + '\n');
+      process.stdout.write(`${files[i].src}\n`);
     }
   }
 }

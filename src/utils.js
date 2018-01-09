@@ -1,5 +1,6 @@
 const fs = require('fs');
 const fsExtra = require('fs-extra');
+const { tmpdir } = require('os');
 const path = require('path');
 const glob = require('glob');
 
@@ -25,7 +26,7 @@ function formatPath(imgPath, imgFileType) {
   		imgDir = path.dirname(imgPath) + '/';
   		fileType = path.basename(imgPath);
   	}
-    return { imgDir, fileType }
+    return { imgDir, fileType };
   } catch(e) {
   	console.log('Invalid PATH');
   	process.exit();
@@ -33,10 +34,12 @@ function formatPath(imgPath, imgFileType) {
 }
 
 function makeTmpDirectory(files) {
-  for (let i = 0; i < files.length; i++) {
-    const dir = './tmp/' + path.dirname(files[i]);
-  	fsExtra.mkdirsSync(dir);
+  const tempDir = `${tmpdir}/image-optimize/`;
+  for (let i = 0; i < files.length; i += 1) {
+    const dir = tempDir + path.dirname(files[i]);
+    fsExtra.mkdirsSync(dir);
   }
+  return tempDir;
 }
 
 function getSizeInfo(path, callback) {
@@ -46,13 +49,13 @@ function getSizeInfo(path, callback) {
       return;
     }
     let totalSize = 0;
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < files.length; i += 1) {
       const stats = fs.statSync(files[i]);
       const fileSizeInBytes = stats.size;
-      totalSize+= fileSizeInBytes;
+      totalSize += fileSizeInBytes;
     }
 
-    callback(null, {files: files, size: totalSize});
+    callback(null, { files, size: totalSize });
   });
 }
 
