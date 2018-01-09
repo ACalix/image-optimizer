@@ -1,6 +1,7 @@
 import fsExtra from 'fs-extra';
 import confirm from 'confirm-simple';
 import program from 'commander';
+import log from './log';
 import {
   getSizeInfo,
   formatPath,
@@ -36,7 +37,7 @@ getSizeInfo(imgDir + fileType, (err, result) => {
   const originalSize = Math.round((result.size) / 1024);
 
   if (program.verbose) {
-    logStart(result.files, originalSize);
+    log.start(result.files, originalSize);
   }
 
   tmpDir = makeTmpDirectory(result.files);
@@ -50,7 +51,7 @@ getSizeInfo(imgDir + fileType, (err, result) => {
         if (ok && program.verbose) {
           let optimizedSize = 0;
           files.forEach(file => optimizedSize += file.destSize);
-          logEnd(files.length, optimizedSize);
+          log.end(files.length, optimizedSize, originalSize);
           replaceSrcFiles();
         } else if (ok) {
           replaceSrcFiles();
@@ -68,23 +69,6 @@ process.on('SIGINT', () => {
     removeTmpDir(tmpDir);
   }
 });
-
-function logStart(fileCount, dirSize) {
-  console.log('### Before optimizing ###');
-  console.log('Files: ' + fileCount);
-  console.log('Total Size: ' + dirSize + 'kb');
-  console.log('#########################');
-}
-
-function logEnd(fileCount, dirSize, sizeReduced, percentReduced) {
-  const totalSizeReduced = originalSize - optimizedSize;
-  const totalSizeReducedPercent = 100 - Math.round(optimizedSize / originalSize * 100);
-  console.log('### After optimizing ###');
-  console.log('Files: ' + fileCount);
-  console.log('Total Size: ' + dirSize + 'kb');
-  console.log('Total size reduced by: '+sizeReduced+'kb ('+percentReduced+'%)');
-  console.log('#########################');
-}
 
 function replaceSrcFiles() {
   const copyOptions = {
