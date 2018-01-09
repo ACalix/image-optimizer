@@ -1,7 +1,11 @@
 import fsExtra from 'fs-extra';
 import confirm from 'confirm-simple';
 import program from 'commander';
-import { getSizeInfo, formatPath, makeTmpDirectory } from './utils';
+import {
+  getSizeInfo,
+  formatPath,
+  makeTmpDirectory,
+  removeTmpDir } from './utils';
 
 let imgType;
 let fileType, imgDir, tmpDir;
@@ -39,7 +43,7 @@ getSizeInfo(imgDir + fileType, (err, result) => {
 
   batch(result.files, imgType, tmpDir).then((files) => {
     if (program.audit) {
-      removeTmpDir();
+      removeTmpDir(tmpDir);
       printFiles(files, program.audit);
     } else {
       confirm('Would you like to replace these files?', ok => {
@@ -51,12 +55,18 @@ getSizeInfo(imgDir + fileType, (err, result) => {
         } else if (ok) {
           replaceSrcFiles();
         } else {
-          removeTmpDir();
+          removeTmpDir(tmpDir);
         }
       });
     }
   })
   .catch(err => { throw err });
+});
+
+process.on('SIGINT', () => {
+  if (tmpDir) {
+    removeTmpDir(tmpDir);
+  }
 });
 
 function logStart(fileCount, dirSize) {
@@ -85,17 +95,8 @@ function replaceSrcFiles() {
       console.log('Error copying files back to original location');
     } else {
       console.log('Done copying files back to original location');
-      removeTmpDir();
+      removeTmpDir(tmpDir);
     }
-  });
-}
-
-function removeTmpDir() {
-  fsExtra.remove(tmpDir, (err) => {
-    if (err) {
-      console.log('error cleaning tmp files');
-    }
-    process.exit();
   });
 }
 

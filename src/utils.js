@@ -42,6 +42,15 @@ function makeTmpDirectory(files) {
   return tempDir;
 }
 
+function removeTmpDir(tmpDir) {
+  fsExtra.remove(tmpDir, (err) => {
+    if (err) {
+      console.log('error cleaning tmp files');
+    }
+    process.exit();
+  });
+}
+
 function getSizeInfo(path, callback) {
   glob(path, function(err, files) {
     if (err) {
@@ -68,5 +77,6 @@ module.exports = {
   getSizeInfo,
   getSizeKB,
   formatPath,
-  makeTmpDirectory
+  makeTmpDirectory,
+  removeTmpDir
 };

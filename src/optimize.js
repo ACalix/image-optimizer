@@ -58,7 +58,8 @@ export async function optimizeBatch(files, type, tmpdir) {
     const file = files[i];
     runningOptimizers.push(optimizer.run(file, tmpdir + file)
       .then((result) => {
-        process.stdout.write(`${result.src} is complete... (${result.changePercent}% reduction)\n`);
+        const index = fileChange.length + 1;
+        process.stdout.write(`${index}. ${result.src} is complete... (${result.changePercent}% reduction)\n`);
         return fileChange.push(result);
       })
       .catch((error) => { console.error(error); }));
