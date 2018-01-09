@@ -8,10 +8,11 @@ function formatPath(imgPath, imgFileType) {
     png: '**/*.png',
     jpg: '**/*.jpg'
   };
+  let imgDir, fileType;
 
   try {
   	imgPath = path.normalize(imgPath);
-  	var pathStats = fs.statSync(imgPath);
+  	const pathStats = fs.statSync(imgPath);
 
   	if (pathStats.isDirectory()) {
   		if (imgPath[imgPath.length-1] !== '/')
@@ -26,7 +27,6 @@ function formatPath(imgPath, imgFileType) {
   	}
     return { imgDir, fileType }
   } catch(e) {
-    console.log(e);
   	console.log('Invalid PATH');
   	process.exit();
   }
@@ -45,10 +45,10 @@ function getSizeInfo(path, callback) {
       callback(err);
       return;
     }
-    var totalSize = 0;
-    for (var i = 0; i < files.length; i++) {
-      var stats = fs.statSync(files[i]);
-      var fileSizeInBytes = stats.size;
+    let totalSize = 0;
+    for (let i = 0; i < files.length; i++) {
+      const stats = fs.statSync(files[i]);
+      const fileSizeInBytes = stats.size;
       totalSize+= fileSizeInBytes;
     }
 

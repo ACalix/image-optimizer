@@ -27,7 +27,7 @@ class Optimizer {
         }
         const sizeBefore = getSizeKB(src);
         const sizeAfter = getSizeKB(dest);
-        var changePercent = 100 - Math.round(sizeAfter / sizeBefore * 100);
+        let changePercent = 100 - Math.round(sizeAfter / sizeBefore * 100);
         changePercent = Math.max(0, changePercent);
 
         resolve({
@@ -42,7 +42,7 @@ class Optimizer {
   }
 }
 
-function initOptimizer(type) {
+export function initOptimizer(type) {
   if (optimizer !== null) {
     return new Optimizer(type);
   } else {
@@ -50,7 +50,7 @@ function initOptimizer(type) {
   }
 }
 
-async function optimizeBatch(files, type) {
+export async function optimizeBatch(files, type) {
   const optimizer = new Optimizer(type);
   let fileChange = [];
 
@@ -68,8 +68,3 @@ async function optimizeBatch(files, type) {
   return fileChange;
 }
 
-module.exports = {
-  optimizeBatch,
-  Optimizer,
-  initOptimizer
-};

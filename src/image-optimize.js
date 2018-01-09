@@ -3,7 +3,7 @@ const { getSizeInfo, formatPath, makeTmpDirectory } = require('./utils');
 const confirm = require('confirm-simple');
 
 let imgType;
-var fileType, imgDir, tmpDir = './tmp/';
+let fileType, imgDir, tmpDir = './tmp/';
 const program = require('commander');
 program
   .version('1.0.0')
@@ -13,7 +13,6 @@ program
   .option('-m, --multicore', 'Allow optimizers to run in parallel', '')
   .arguments('<IMGTYPE> <PATH>')
   .action((IMGTYPE, PATH) => {
-    console.log(PATH);
     const result = formatPath(PATH, IMGTYPE);
     imgDir = result.imgDir;
     fileType = result.fileType;
@@ -73,7 +72,7 @@ function logEnd(fileCount, dirSize, sizeReduced, percentReduced) {
 }
 
 function replaceSrcFiles() {
-  var copyOptions = {
+  const copyOptions = {
     clobber: true
   };
   fsExtra.copy(tmpDir + imgDir, imgDir, copyOptions, function(err) {
