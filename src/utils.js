@@ -12,24 +12,24 @@ function formatPath(imgPath, imgFileType) {
   let imgDir, fileType;
 
   try {
-  	imgPath = path.normalize(imgPath);
-  	const pathStats = fs.statSync(imgPath);
+    imgPath = path.normalize(imgPath);
+    const pathStats = fs.statSync(imgPath);
 
-  	if (pathStats.isDirectory()) {
-  		if (imgPath[imgPath.length-1] !== '/')
-  			imgPath = imgPath + '/';
-  		imgDir = imgPath;
+    if (pathStats.isDirectory()) {
+      if (imgPath[imgPath.length-1] !== '/')
+        imgPath = imgPath + '/';
+      imgDir = imgPath;
       fileType = fileTypes[imgFileType];
-  	}
+    }
 
-  	if (pathStats.isFile()) {
-  		imgDir = path.dirname(imgPath) + '/';
-  		fileType = path.basename(imgPath);
-  	}
+    if (pathStats.isFile()) {
+      imgDir = path.dirname(imgPath) + '/';
+      fileType = path.basename(imgPath);
+    }
     return { imgDir, fileType };
   } catch(e) {
-  	console.log('Invalid PATH');
-  	process.exit();
+    console.log('Invalid PATH');
+    process.exit();
   }
 }
 
@@ -51,20 +51,21 @@ function removeTmpDir(tmpDir) {
   });
 }
 
-function getSizeInfo(path, callback) {
-  glob(path, function(err, files) {
-    if (err) {
-      callback(err);
-      return;
-    }
-    let totalSize = 0;
-    for (let i = 0; i < files.length; i += 1) {
-      const stats = fs.statSync(files[i]);
-      const fileSizeInBytes = stats.size;
-      totalSize += fileSizeInBytes;
-    }
+function getSizeInfo(path) {
+  return new Promise((resolve, reject) => {
+    glob(path, (err, files) => {
+      if (err) {
+        reject(err);
+      }
+      let totalSize = 0;
+      for (let i = 0; i < files.length; i += 1) {
+        const stats = fs.statSync(files[i]);
+        const fileSizeInBytes = stats.size;
+        totalSize += fileSizeInBytes;
+      }
 
-    callback(null, { files, size: totalSize });
+      resolve({ files, size: totalSize });
+    });
   });
 }
 
