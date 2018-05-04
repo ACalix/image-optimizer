@@ -1,5 +1,6 @@
 const fs = require('fs');
 const fsExtra = require('fs-extra');
+const { tmpdir } = require('os');
 const path = require('path');
 const glob = require('glob');
 
@@ -11,48 +12,60 @@ function formatPath(imgPath, imgFileType) {
   let imgDir, fileType;
 
   try {
-  	imgPath = path.normalize(imgPath);
-  	const pathStats = fs.statSync(imgPath);
+    imgPath = path.normalize(imgPath);
+    const pathStats = fs.statSync(imgPath);
 
-  	if (pathStats.isDirectory()) {
-  		if (imgPath[imgPath.length-1] !== '/')
-  			imgPath = imgPath + '/';
-  		imgDir = imgPath;
+    if (pathStats.isDirectory()) {
+      if (imgPath[imgPath.length-1] !== '/')
+        imgPath = imgPath + '/';
+      imgDir = imgPath;
       fileType = fileTypes[imgFileType];
-  	}
+    }
 
-  	if (pathStats.isFile()) {
-  		imgDir = path.dirname(imgPath) + '/';
-  		fileType = path.basename(imgPath);
-  	}
-    return { imgDir, fileType }
+    if (pathStats.isFile()) {
+      imgDir = path.dirname(imgPath) + '/';
+      fileType = path.basename(imgPath);
+    }
+    return { imgDir, fileType };
   } catch(e) {
-  	console.log('Invalid PATH');
-  	process.exit();
+    console.log('Invalid PATH');
+    process.exit();
   }
 }
 
 function makeTmpDirectory(files) {
-  for (let i = 0; i < files.length; i++) {
-    const dir = './tmp/' + path.dirname(files[i]);
-  	fsExtra.mkdirsSync(dir);
+  const tempDir = `${tmpdir}/image-optimize/`;
+  for (let i = 0; i < files.length; i += 1) {
+    const dir = tempDir + path.dirname(files[i]);
+    fsExtra.mkdirsSync(dir);
   }
+  return tempDir;
 }
 
-function getSizeInfo(path, callback) {
-  glob(path, function(err, files) {
+function removeTmpDir(tmpDir) {
+  fsExtra.remove(tmpDir, (err) => {
     if (err) {
-      callback(err);
-      return;
+      console.log('error cleaning tmp files');
     }
-    let totalSize = 0;
-    for (let i = 0; i < files.length; i++) {
-      const stats = fs.statSync(files[i]);
-      const fileSizeInBytes = stats.size;
-      totalSize+= fileSizeInBytes;
-    }
+    process.exit();
+  });
+}
 
-    callback(null, {files: files, size: totalSize});
+function getSizeInfo(path) {
+  return new Promise((resolve, reject) => {
+    glob(path, (err, files) => {
+      if (err) {
+        reject(err);
+      }
+      let totalSize = 0;
+      for (let i = 0; i < files.length; i += 1) {
+        const stats = fs.statSync(files[i]);
+        const fileSizeInBytes = stats.size;
+        totalSize += fileSizeInBytes;
+      }
+
+      resolve({ files, size: totalSize });
+    });
   });
 }
 
@@ -65,5 +78,6 @@ module.exports = {
   getSizeInfo,
   getSizeKB,
   formatPath,
-  makeTmpDirectory
+  makeTmpDirectory,
+  removeTmpDir
 };
